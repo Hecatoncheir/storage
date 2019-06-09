@@ -3,7 +3,12 @@ description: Storage for dart projects.
 version: 0.0.0+1
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.3.1 <3.0.0"
+
+
+dependencies:
+  uuid: ^2.0.1
+  logging: ^0.11.3+2
 
 dev_dependencies:
   test: ^1.6.4
