@@ -11,12 +11,15 @@ import 'store.dart' show Entity, Store, StoreDeleteError, StoreUpdateError;
 abstract class StorageKey {
   Object value;
   StorageKey.fromJson(String source);
+  void fromJson(String source);
   String toJson();
 }
 
 abstract class StorageValue {
   Object value;
   StorageValue.fromJson(String source);
+
+  void fromJson(String source);
   String toJson();
 }
 
@@ -57,7 +60,7 @@ class KVStore<StorageKey, StorageValue> implements Store {
       final content = readWriter.read();
       if (content.isNotEmpty) {
         final encodedCache = json.decode(String.fromCharCodes(content));
-        _updateCache(encodedCache);
+        updateCache(encodedCache);
       }
     } on Exception catch (exception) {
       log.warning(exception);
@@ -104,8 +107,8 @@ class KVStore<StorageKey, StorageValue> implements Store {
     return null;
   }
 
-  void _updateCache(Map<String, Map<String, String>> encodedCache) {
-//    encodedCache.forEach((String key, Map<String,StorageValue))
+  void updateCache(Map sourceCache) {
+    Map<String, Map<String, String>> encodedCache = sourceCache;
   }
 
   void _updateReadWriter(
