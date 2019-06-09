@@ -4,20 +4,22 @@ import 'package:storage/stores.dart';
 import 'package:test/test.dart';
 
 class SomeStorageKey implements StorageKey {
-  int key;
+  @override
+  Object value;
 
-  SomeStorageKey(this.key);
+  SomeStorageKey(this.value);
 
   SomeStorageKey.fromJson(String source) {
-    key = int.parse(source);
+    value = int.parse(source);
   }
 
   @override
-  String toJson() => key.toString();
+  String toJson() => value.toString();
 }
 
 class SomeStorageValue implements StorageValue {
-  String value;
+  @override
+  Object value;
 
   SomeStorageValue(this.value);
 
@@ -58,8 +60,7 @@ void main() {
 
       final entity = kvStore.read(id);
       expect(entity.id, equals(id));
-      expect(
-          entity.data, equals({SomeStorageKey(0): SomeStorageValue('value')}));
+      expect(entity.data, equals({0: 'value'}));
     });
 
     test('update', () {
@@ -67,14 +68,14 @@ void main() {
 
       final entity = kvStore.read(id);
       expect(entity.id, equals(id));
-      expect(
-          entity.data, equals({SomeStorageKey(0): SomeStorageValue('value')}));
+      expect(entity.data, equals({0: 'value'}));
 
       final content = kvStore.readWriter.read();
       expect(content, isNotEmpty);
 
       final updatedTestEntityForWrite =
           Entity<Map<SomeStorageKey, SomeStorageValue>>(
+              id: id,
               data: {SomeStorageKey(0): SomeStorageValue('updated value')});
 
       final error = kvStore.update(updatedTestEntityForWrite);

@@ -9,11 +9,13 @@ import 'package:storage/read_writers/read_writer.dart'
 import 'store.dart' show Entity, Store, StoreDeleteError, StoreUpdateError;
 
 abstract class StorageKey {
+  Object value;
   StorageKey.fromJson(String source);
   String toJson();
 }
 
 abstract class StorageValue {
+  Object value;
   StorageValue.fromJson(String source);
   String toJson();
 }
@@ -72,7 +74,7 @@ class KVStore<StorageKey, StorageValue> implements Store {
   @override
   String create(Entity entity) {
     final id = Uuid().v4();
-    _cache[id] = entity.data;
+    _cache[id] = KVEntity.fromMap(entity.data);
     _updateReadWriter(_cache);
     return id;
   }
@@ -80,14 +82,16 @@ class KVStore<StorageKey, StorageValue> implements Store {
   @override
   Entity read(String id) {
     final entity = _cache[id];
-    final data = {entity.keys.first: entity.values.first};
+    final data = {
+      (entity.key as dynamic).value: (entity.value as dynamic).value
+    };
     return Entity(id: id, data: data);
   }
 
   @override
   StoreUpdateError update(Entity entity) {
     if (entity.id == null) return StoreUpdateError.cannotBeUpdate;
-    _cache[entity.id] = entity.data;
+    _cache[entity.id] = KVEntity.fromMap(entity.data);
     _updateReadWriter(_cache);
     return null;
   }
@@ -104,12 +108,18 @@ class KVStore<StorageKey, StorageValue> implements Store {
 //    encodedCache.forEach((String key, Map<String,StorageValue))
   }
 
-  void _updateReadWriter(Map<String, Map<StorageKey, StorageValue>> cache) {
+  void _updateReadWriter(
+      Map<String, KVEntity<StorageKey, StorageValue>> cache) {
     try {
       final cacheForEncode = Map<String, Map<String, String>>();
 
       for (String id in cache.keys) {
-        final Map<StorageKey, StorageValue> entity = cache[id];
+        final kvEntity = cache[id];
+
+        final Map<StorageKey, StorageValue> entity = {
+          kvEntity.key: kvEntity.value
+        };
+
         final StorageKey storageKey = entity.keys.first;
         final StorageValue storageValue = entity.values.first;
 
