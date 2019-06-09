@@ -3,21 +3,49 @@ import 'package:storage/storage.dart';
 import 'package:storage/stores.dart';
 import 'package:test/test.dart';
 
+class SomeStorageKey implements StorageKey {
+  int key;
+
+  SomeStorageKey(this.key);
+
+  SomeStorageKey.fromJson(String source) {
+    key = int.parse(source);
+  }
+
+  @override
+  String toJson() => key.toString();
+}
+
+class SomeStorageValue implements StorageValue {
+  String value;
+
+  SomeStorageValue(this.value);
+
+  SomeStorageValue.fromJson(this.value);
+
+  @override
+  String toJson() => value;
+}
+
 void main() {
   group('KVStorage', () {
     InMemory readWriter;
-    KVStore<int, String> kvStore;
+    KVStore<SomeStorageKey, SomeStorageValue> kvStore;
+
+    Entity<Map<SomeStorageKey, SomeStorageValue>> testEntityForWrite;
 
     setUp(() {
+      testEntityForWrite = Entity<Map<SomeStorageKey, SomeStorageValue>>(
+          data: {SomeStorageKey(0): SomeStorageValue('value')});
+
       readWriter = InMemory();
-      kvStore = KVStore<int, String>(readWriter);
+      kvStore = KVStore<SomeStorageKey, SomeStorageValue>(readWriter);
     });
 
     test('create', () {
       expect(readWriter.read(), isEmpty);
 
-      final testEntity = Entity<Map<int, String>>(data: {0: 'value'});
-      final id = kvStore.create(testEntity);
+      final id = kvStore.create(testEntityForWrite);
 
       expect(id, isNotNull);
       expect(id, isNotEmpty);
@@ -26,26 +54,30 @@ void main() {
     });
 
     test('read', () {
-      final testEntity = Entity<Map<int, String>>(data: {0: 'value'});
-      final id = kvStore.create(testEntity);
+      final id = kvStore.create(testEntityForWrite);
 
       final entity = kvStore.read(id);
       expect(entity.id, equals(id));
-      expect(entity.data, equals({0: 'value'}));
+      expect(
+          entity.data, equals({SomeStorageKey(0): SomeStorageValue('value')}));
     });
 
     test('update', () {
-      final testEntity = Entity<Map<int, String>>(data: {0: 'value'});
-      final id = kvStore.create(testEntity);
+      final id = kvStore.create(testEntityForWrite);
 
       final entity = kvStore.read(id);
       expect(entity.id, equals(id));
-      expect(entity.data, equals({0: 'value'}));
+      expect(
+          entity.data, equals({SomeStorageKey(0): SomeStorageValue('value')}));
 
       final content = kvStore.readWriter.read();
       expect(content, isNotEmpty);
 
-      final error = kvStore.update(Entity(id: id, data: {0: 'updated value'}));
+      final updatedTestEntityForWrite =
+          Entity<Map<SomeStorageKey, SomeStorageValue>>(
+              data: {SomeStorageKey(0): SomeStorageValue('updated value')});
+
+      final error = kvStore.update(updatedTestEntityForWrite);
       expect(error, isNull);
 
       final updatedEntity = kvStore.read(id);
@@ -62,8 +94,7 @@ void main() {
     });
 
     test('delete with error ', () {
-      final testEntity = Entity<Map<int, String>>(data: {0: 'value'});
-      final id = kvStore.create(testEntity);
+      final id = kvStore.create(testEntityForWrite);
 
       final entity = kvStore.read(id);
       expect(entity.id, equals(id));
