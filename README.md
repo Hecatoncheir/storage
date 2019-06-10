@@ -12,7 +12,7 @@ void main(){
       valueFromJson: (value) => value);
   
       final entityForCreate = Entity<Map<int, String>>(data: {0: 'value'});
-      final id = kvStore.create(testEntity);
+      final id = kvStore.create(entityForCreate;
       
       
       final entity = kvStore.read(id);
