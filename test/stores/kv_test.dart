@@ -1,9 +1,33 @@
+import 'dart:convert';
+
 import 'package:storage/read_writers.dart';
 import 'package:storage/storage.dart';
 import 'package:storage/stores.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('KVStorage', () {
+    test('can prepare cache from readwriter content', () {
+      InMemory readWriter;
+      KVStore<int, String> kvStore;
+
+      readWriter = InMemory()
+        ..write(json.encode({
+          '0': {'0': 'value'}
+        }).codeUnits);
+
+      kvStore = KVStore<int, String>(readWriter,
+          keyToJson: (key) => key.toString(),
+          keyFromJson: int.parse,
+          valueToJson: (value) => value,
+          valueFromJson: (value) => value);
+
+      final entity = kvStore.read('0');
+      expect(entity.data.keys.first, equals(0));
+      expect(entity.data.values.first, equals('value'));
+    });
+  });
+
   group('KVStorage', () {
     InMemory readWriter;
     KVStore<int, String> kvStore;

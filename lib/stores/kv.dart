@@ -83,8 +83,8 @@ class KVStore<K, V> implements Store {
   }
 
   Map<String, Map<K, V>> prepareCacheFromReadWriterContent(
-      Map<String, Map<String, String>> content) {
-    Map<String, Map<K, V>> cacheForWrite;
+      Map<String, dynamic> content) {
+    final cacheForWrite = Map<String, Map<K, V>>();
 
     for (String id in content.keys) {
       final entity = content[id];
