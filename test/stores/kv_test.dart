@@ -10,7 +10,11 @@ void main() {
 
     setUp(() {
       readWriter = InMemory();
-      kvStore = KVStore<int, String>(readWriter);
+      kvStore = KVStore<int, String>(readWriter,
+          keyToJson: (key) => key.toString(),
+          keyFromJson: int.parse,
+          valueToJson: (value) => value,
+          valueFromJson: (value) => value);
     });
 
     test('create', () {

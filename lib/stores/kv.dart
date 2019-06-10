@@ -8,22 +8,6 @@ import 'package:storage/read_writers/read_writer.dart'
 
 import 'store.dart' show Entity, Store, StoreDeleteError, StoreUpdateError;
 
-/// KVEntity - entity for KVStore
-class KVEntity<K, V> {
-  K key;
-  V value;
-
-  KVEntity(this.key, this.value);
-
-  KVEntity.fromMap(Map<K, V> map) {
-    this.key = map.keys.first;
-    this.value = map.values.first;
-  }
-
-  Map<K, V> toMap() => {key: value};
-  Map<String, V> toJson() => {'$key': value};
-}
-
 /// KVStore - storage for save with key-value pair
 class KVStore<K, V> implements Store {
   @override
@@ -32,18 +16,30 @@ class KVStore<K, V> implements Store {
   /// log - for write some logs
   Logger log;
 
-  Map<String, KVEntity<K, V>> _cache;
+  Map<String, Map<K, V>> _cache;
+
+  K Function(String) keyFromJson;
+  String Function(K) keyToJson;
+
+  V Function(String) valueFromJson;
+  String Function(V) valueToJson;
 
   /// Constructor
-  KVStore(this.readWriter, {this.log}) {
+  KVStore(this.readWriter,
+      {this.log,
+      this.keyFromJson,
+      this.keyToJson,
+      this.valueFromJson,
+      this.valueToJson}) {
     log ??= Logger('KVStore');
 
-    _cache = Map<String, KVEntity<K, V>>();
+    _cache = Map<String, Map<K, V>>();
 
     try {
       final content = readWriter.read();
       if (content.isNotEmpty) {
-        _cache = json.decode(String.fromCharCodes(content));
+        _cache = prepareCacheFromReadWriterContent(
+            json.decode(String.fromCharCodes(content)));
       }
     } on Exception catch (exception) {
       log.warning(exception);
@@ -51,30 +47,29 @@ class KVStore<K, V> implements Store {
   }
 
   /// operator for get value from cache
-  Map<K, V> operator [](String id) => _cache[id].toMap();
+  Map<K, V> operator [](String id) => _cache[id];
 
   /// operator for set value to cache
-  void operator []=(String key, Map<K, V> value) =>
-      _cache[key] = KVEntity.fromMap(value);
+  void operator []=(String key, Map<K, V> value) => _cache[key] = value;
 
   @override
   String create(Entity entity) {
     final id = Uuid().v4();
-    _cache[id] = KVEntity.fromMap(entity.data);
+    _cache[id] = entity.data;
     _updateReadWriter(_cache);
     return id;
   }
 
   @override
   Entity read(String id) {
-    final kvEntity = _cache[id];
-    return Entity(id: id, data: {kvEntity.key: kvEntity.value});
+    final entity = _cache[id];
+    return Entity(id: id, data: {entity.keys.first: entity.values.first});
   }
 
   @override
   StoreUpdateError update(Entity entity) {
     if (entity.id == null) return StoreUpdateError.cannotBeUpdate;
-    _cache[entity.id] = KVEntity.fromMap(entity.data);
+    _cache[entity.id] = entity.data;
     _updateReadWriter(_cache);
     return null;
   }
@@ -87,10 +82,33 @@ class KVStore<K, V> implements Store {
     return null;
   }
 
-  void _updateReadWriter(Map<String, KVEntity<K, V>> cache) {
+  Map<String, Map<K, V>> prepareCacheFromReadWriterContent(
+      Map<String, Map<String, String>> content) {
+    Map<String, Map<K, V>> cacheForWrite;
+
+    for (String id in content.keys) {
+      final entity = content[id];
+      cacheForWrite[id] = {
+        keyFromJson(entity.keys.first): valueFromJson(entity.values.first)
+      };
+    }
+
+    return cacheForWrite;
+  }
+
+  void _updateReadWriter(Map<String, Map<K, V>> cache) {
     try {
+      final cacheForWrite = Map<String, Map<String, String>>();
+
+      for (String id in cache.keys) {
+        final entity = cache[id];
+        cacheForWrite[id] = {
+          keyToJson(entity.keys.first): valueToJson(entity.values.first)
+        };
+      }
+
       final ReadWriterError error =
-          readWriter.reWrite(json.encode(cache).codeUnits);
+          readWriter.reWrite(json.encode(cacheForWrite).codeUnits);
 
       if (error != null) {
         log.warning(error);
