@@ -1,5 +1,4 @@
 import 'package:storage/read_writers.dart';
-import 'package:storage/read_writers/read_writer.dart';
 import 'package:test/test.dart';
 
 void main() {
