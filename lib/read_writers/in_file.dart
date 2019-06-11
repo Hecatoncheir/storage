@@ -47,7 +47,7 @@ class InFile implements ReadWriter {
       memories = String.fromCharCodes(updatedMemories);
     }
 
-    file.writeAsStringSync(memories, flush: true);
+    file.writeAsStringSync(memories);
 
     return status;
   }
