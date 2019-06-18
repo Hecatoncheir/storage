@@ -23,22 +23,42 @@ void main() {
           field(
             'todos',
             listOf(todoType),
-            resolve: (_, __) => [
-                  Todo(
-                    text: 'Clean your room!',
-                    completed: false,
-                  )
-                ],
+            inputs: [GraphQLFieldInput('contains', graphQLString)],
+            resolve: (_, inputs) {
+              final todos = [
+                Todo(
+                  text: 'test',
+                  completed: false,
+                ),
+                Todo(
+                  text: 'text',
+                  completed: false,
+                )
+              ];
+
+              return todos
+                  .where((todo) => todo.text.contains(inputs['contains']));
+            },
           ),
         ]),
       );
 
       final graphql = GraphQL(schema);
-      final result = await graphql.parseAndExecute('{ todos { text } }');
+      final result =
+          await graphql.parseAndExecute('{ todos(contains: "test") { text } }');
 
       expect(result, {
         'todos': [
-          {'text': 'Clean your room!'}
+          {'text': 'test'}
+        ]
+      });
+
+      final secondResult =
+          await graphql.parseAndExecute('{ todos(contains: "text") { text } }');
+
+      expect(secondResult, {
+        'todos': [
+          {'text': 'text'}
         ]
       });
     });
