@@ -1,5 +1,4 @@
 import 'package:graphql_schema/graphql_schema.dart';
-import 'package:graphql_schema/graphql_schema.dart' as prefix0;
 import 'package:test/test.dart';
 import 'package:storage/stores.dart';
 
