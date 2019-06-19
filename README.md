@@ -1,7 +1,7 @@
 # storage
 Storage for dart projects.
 
-### Key value storage with inMemory readWriter:
+### Key value storage with readWriter:
 ```dart
 void main(){
   final file = File('/in_file.txt')..createSync();
