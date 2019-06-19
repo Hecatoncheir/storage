@@ -4,7 +4,10 @@ Storage for dart projects.
 ### Key value storage with inMemory readWriter:
 ```dart
 void main(){
-  final readWriter = InMemory();
+  final file = File('/in_file.txt')..createSync();
+  final readWriter = InFile(file);
+      // or
+  // final readWriter = InMemory();
   final kvStore = KVStore<int, String>(readWriter,
       keyToJson: (key) => key.toString(),
       keyFromJson: int.parse,
