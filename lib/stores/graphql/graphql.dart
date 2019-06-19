@@ -510,7 +510,7 @@ class GraphQL {
           fields, result, variableValues, globalVariables);
 
       if (completedResult == null) {
-        throw new GraphQLException.fromMessage(
+        throw GraphQLException.fromMessage(
             'Null value provided for non-nullable field "$fieldName".');
       } else {
         return completedResult;

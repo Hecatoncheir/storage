@@ -1,4 +1,5 @@
 import 'package:graphql_schema/graphql_schema.dart';
+import 'package:graphql_schema/graphql_schema.dart' as prefix0;
 import 'package:test/test.dart';
 import 'package:storage/stores.dart';
 
@@ -61,6 +62,79 @@ void main() {
           {'text': 'text'}
         ]
       });
+    });
+  });
+
+  group('Mutation', () {
+    GraphQLObjectType todoType;
+
+    GraphQLObjectType query;
+    GraphQLObjectType mutation;
+
+    List<Todo> todos;
+
+    setUp(() {
+      todos = <Todo>[];
+
+      todoType = objectType('todo', fields: [
+        field(
+          'text',
+          graphQLString,
+          resolve: (obj, args) => obj.text,
+        ),
+        field(
+          'completed',
+          graphQLBoolean,
+          resolve: (obj, args) => obj.completed,
+        ),
+      ]);
+
+      query = objectType('TestQuery', fields: [
+        field('todos', listOf(todoType),
+            inputs: [GraphQLFieldInput('contains', graphQLString)],
+            resolve: (_, inputs) =>
+                todos.where((todo) => todo.text.contains(inputs['contains']))),
+      ]);
+
+      mutation = objectType(
+        'TestMutation',
+        fields: [
+          field(
+            'todo',
+            todoType.nonNullable(),
+            description: 'Modifies a todo in the database.',
+            inputs: [
+              GraphQLFieldInput('text', graphQLString.nonNullable()),
+              GraphQLFieldInput('completed', graphQLBoolean.nonNullable()),
+            ],
+            resolve: (_, inputs) {
+              final todo =
+                  Todo(text: inputs['text'], completed: inputs['completed']);
+              todos.add(todo);
+              return todo;
+            },
+          ),
+        ],
+      );
+    });
+
+    test('create', () async {
+      final schema = GraphQLSchema(queryType: query, mutationType: mutation);
+      final graphQL = GraphQL(schema);
+      const testMutation = '''
+      mutation {
+        todo(text: "First todo", completed: false) {
+          text
+          completed
+        }
+      }
+      ''';
+
+      expect(todos, isEmpty);
+      final result = await graphQL.parseAndExecute(testMutation);
+      expect(todos, isNotEmpty);
+      expect(result['todo']['text'], equals('First todo'));
+      expect(result['todo']['completed'], isFalse);
     });
   });
 }
