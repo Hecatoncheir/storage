@@ -34,4 +34,4 @@ void main(){
 ```
 
 ### GraphQL
-See tests in /tests/stores/graphql_test.dart
+See tests in `/tests/stores/graphql_test.dart`
