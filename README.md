@@ -32,3 +32,6 @@ void main(){
       /// enum StoreDeleteError { cannotBeDelete }
 }
 ```
+
+### GraphQL
+See tests in /tests/stores/graphql_test.dart
