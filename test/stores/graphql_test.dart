@@ -3,68 +3,7 @@ import 'package:test/test.dart';
 import 'package:storage/stores.dart';
 
 void main() {
-  group('Query', () {
-    test('single element', () async {
-      final todoType = objectType('todo', fields: [
-        field(
-          'text',
-          graphQLString,
-          resolve: (obj, args) => obj.text,
-        ),
-        field(
-          'completed',
-          graphQLBoolean,
-          resolve: (obj, args) => obj.completed,
-        ),
-      ]);
-
-      final schema = graphQLSchema(
-        queryType: objectType('api', fields: [
-          field(
-            'todos',
-            listOf(todoType),
-            inputs: [GraphQLFieldInput('contains', graphQLString)],
-            resolve: (_, inputs) {
-              final todos = [
-                Todo(
-                  text: 'test',
-                  completed: false,
-                ),
-                Todo(
-                  text: 'text',
-                  completed: false,
-                )
-              ];
-
-              return todos
-                  .where((todo) => todo.text.contains(inputs['contains']));
-            },
-          ),
-        ]),
-      );
-
-      final graphql = GraphQL(schema);
-      final result =
-          await graphql.parseAndExecute('{ todos(contains: "test") { text } }');
-
-      expect(result, {
-        'todos': [
-          {'text': 'test'}
-        ]
-      });
-
-      final secondResult =
-          await graphql.parseAndExecute('{ todos(contains: "text") { text } }');
-
-      expect(secondResult, {
-        'todos': [
-          {'text': 'text'}
-        ]
-      });
-    });
-  });
-
-  group('Mutation', () {
+  group('GraphQL', () {
     GraphQLObjectType todoType;
 
     GraphQLObjectType query;
@@ -117,7 +56,59 @@ void main() {
       );
     });
 
-    test('create', () async {
+    tearDown(() {
+      todos.clear();
+    });
+
+    test('query', () async {
+      todos.addAll([
+        Todo(
+          text: 'test',
+          completed: false,
+        ),
+        Todo(
+          text: 'text',
+          completed: false,
+        )
+      ]);
+
+      final schema = GraphQLSchema(queryType: query);
+      final graphQL = GraphQL(schema);
+
+      const todoContainsTestQuery = '''
+      {
+        todos(contains: "test") {
+           text
+        }
+      }
+      ''';
+
+      final result = await graphQL.parseAndExecute(todoContainsTestQuery);
+
+      expect(result, {
+        'todos': [
+          {'text': 'test'}
+        ]
+      });
+
+      const todoContainsTextQuery = '''
+      {
+        todos(contains: "text") {
+           text
+        }
+      }
+      ''';
+
+      final secondResult = await graphQL.parseAndExecute(todoContainsTextQuery);
+
+      expect(secondResult, {
+        'todos': [
+          {'text': 'text'}
+        ]
+      });
+    });
+
+    test('mutation', () async {
       final schema = GraphQLSchema(queryType: query, mutationType: mutation);
       final graphQL = GraphQL(schema);
       const testMutation = '''
