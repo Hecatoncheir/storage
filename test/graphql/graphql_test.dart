@@ -1,8 +1,9 @@
 import 'dart:async';
 
-import 'package:graphql_schema/graphql_schema.dart';
+import 'package:pedantic/pedantic.dart';
 import 'package:test/test.dart';
-import 'package:storage/stores.dart';
+
+import 'package:storage/graphql/graphql.dart';
 
 void main() {
   group('GraphQL', () {
@@ -176,7 +177,7 @@ void main() {
           }
         ''';
 
-      graphQL.parseAndExecute(firstTestMutation);
+      unawaited(graphQL.parseAndExecute(firstTestMutation));
 
       const secondTestMutation = '''
           mutation {
