@@ -5,7 +5,7 @@ Storage for dart projects.
 ```dart
 void main(){
   final file = File('/in_file.txt')..createSync();
-  final readWriter = InFile(file);
+  final readWriter = InFile(file, memories: file.readAsStringSync());
       // or
   // final readWriter = InMemory();
   final kvStore = KVStore<int, String>(readWriter,
