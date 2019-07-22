@@ -9,7 +9,7 @@ void main() {
     InFile inFile;
 
     setUp(() {
-      file = File('test/readwriters/in_file.json')..createSync();
+      file = File('test/read_writers/in_file.json')..createSync();
       inFile = InFile(file);
     });
 
