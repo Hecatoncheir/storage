@@ -1,10 +1,15 @@
 # storage
 Storage for dart projects.
 
-### Key value storage with inMemory readWriter:
+Данные которые получены с сервера (бд) нужно где-то держать что бы они были доступны при выключенном соединении, и их можно тем же запросом запрашивать уже офлайн обращаясь к своим ресолверам а не к серверным. Тот же самый запрос graphql может использоваться на клиенте как для состояния когда приложение находится в сети и доступен сервер так и когда данные есть только на устройстве офлайн.
+
+### Key value storage with readWriter:
 ```dart
 void main(){
-  final readWriter = InMemory();
+  final file = File('/in_file.txt')..createSync();
+  final readWriter = InFile(file, memories: file.readAsStringSync());
+      // or
+  // final readWriter = InMemory();
   final kvStore = KVStore<int, String>(readWriter,
       keyToJson: (key) => key.toString(),
       keyFromJson: int.parse,
@@ -29,3 +34,6 @@ void main(){
       /// enum StoreDeleteError { cannotBeDelete }
 }
 ```
+
+### GraphQL
+See tests in `/tests/stores/graphql_test.dart`

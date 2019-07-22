@@ -6,7 +6,9 @@ import 'package:storage/read_writers/read_writer.dart';
 class InFile implements ReadWriter {
   File file;
   String memories;
+
   InFile(this.file, {this.memories}) {
+    memories ??= file.readAsStringSync();
     memories ??= '';
   }
 
