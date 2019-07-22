@@ -12,7 +12,7 @@ void main() {
       InFile readWriter;
       KVStore<int, String> kvStore;
 
-      final file = File('test/stores/kv_with_in_file_read_writer.txt')
+      final file = File('test/stores/kv_with_in_file_read_writer.json')
         ..createSync();
 
       readWriter = InFile(file)
@@ -41,7 +41,7 @@ void main() {
     File file;
 
     setUp(() {
-      file = File('test/stores/kv_with_in_file_read_writer.txt')..createSync();
+      file = File('test/stores/kv_with_in_file_read_writer.json')..createSync();
       readWriter = InFile(file);
       kvStore = KVStore<int, String>(readWriter,
           keyToJson: (key) => key.toString(),
