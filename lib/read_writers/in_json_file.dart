@@ -16,6 +16,12 @@ class InJSONFile extends InFile {
     if (extension != '.json') throw ArgumentError('Only json format support');
 
     memories ??= file.readAsStringSync();
-    memories ??= '{}';
+    memories.isEmpty ? memories = '[]' : null;
+  }
+
+  @override
+  ReadWriterError write(List<int> bytes) {
+    // TODO: implement write
+    return super.write(bytes);
   }
 }

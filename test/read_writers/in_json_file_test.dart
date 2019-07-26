@@ -17,10 +17,11 @@ void main() {
     tearDown(() => file.deleteSync());
 
     test('read', () {
-      expect(inFile.read(), equals('{}'));
+      expect(inFile.read(), equals('{}'.codeUnits));
       expect(inFile.write(json.encode({'test key': 'test value'}).codeUnits),
           isNull);
-      expect(inFile.read(), equals('test\n'.codeUnits));
+      expect(String.fromCharCodes(inFile.read()),
+          equals(json.encode({'test key': 'test value'})));
     });
 
     test('write', () {

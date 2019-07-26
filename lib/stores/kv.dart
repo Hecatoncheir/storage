@@ -1,6 +1,7 @@
 import 'dart:convert' show json;
 
 import 'package:logging/logging.dart' show Logger;
+import 'package:storage/read_writers.dart';
 import 'package:uuid/uuid.dart' show Uuid;
 
 import 'package:storage/read_writers/read_writer.dart'
@@ -38,8 +39,15 @@ class KVStore<K, V> implements Store {
     try {
       final content = readWriter.read();
       if (content.isNotEmpty) {
-        _cache = prepareCacheFromReadWriterContent(
-            json.decode(String.fromCharCodes(content)));
+        if (readWriter is InFile) {
+          _cache = prepareCacheFromReadWriterInFileContent(
+              json.decode(String.fromCharCodes(content)));
+        }
+
+        if (readWriter is InJSONFile) {
+          _cache = prepareCacheFromReadWriterInJSONFileContent(
+              json.decode(String.fromCharCodes(content)));
+        }
       }
     } on Exception catch (exception) {
       log.warning(exception);
@@ -82,7 +90,7 @@ class KVStore<K, V> implements Store {
     return null;
   }
 
-  Map<String, Map<K, V>> prepareCacheFromReadWriterContent(
+  Map<String, Map<K, V>> prepareCacheFromReadWriterInFileContent(
       Map<String, dynamic> content) {
     final cacheForWrite = Map<String, Map<K, V>>();
 
@@ -92,6 +100,21 @@ class KVStore<K, V> implements Store {
         keyFromJson(entity.keys.first): valueFromJson(entity.values.first)
       };
     }
+
+    return cacheForWrite;
+  }
+
+  Map<String, Map<K, V>> prepareCacheFromReadWriterInJSONFileContent(
+      Map<String, dynamic> content) {
+    final cacheForWrite = Map<String, Map<K, V>>();
+    // TODO
+//
+//    for (String id in content.keys) {
+//      final entity = content[id];
+//      cacheForWrite[id] = {
+//        keyFromJson(entity.keys.first): valueFromJson(entity.values.first)
+//      };
+//    }
 
     return cacheForWrite;
   }
