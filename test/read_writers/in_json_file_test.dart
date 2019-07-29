@@ -17,15 +17,18 @@ void main() {
     tearDown(() => file.deleteSync());
 
     test('read', () {
-      expect(inFile.read(), equals('{}'.codeUnits));
+      expect(inFile.read(), equals('[]'.codeUnits));
       expect(inFile.write(json.encode({'test key': 'test value'}).codeUnits),
           isNull);
-      expect(String.fromCharCodes(inFile.read()),
-          equals(json.encode({'test key': 'test value'})));
+      expect(
+          json.decode(String.fromCharCodes(inFile.read())),
+          equals([
+            {'test key': 'test value'}
+          ]));
     });
 
     test('write', () {
-      expect(inFile.write('test'.codeUnits), isNull);
+      expect(inFile.write(json.encode({'key': 'value'}).codeUnits), isNull);
     });
 
     test('write with error', () {
@@ -33,10 +36,13 @@ void main() {
     });
 
     test('reWrite', () {
-      expect(inFile.write('test'.codeUnits), isNull);
-      expect(inFile.read(), equals('test\n'.codeUnits));
-      expect(inFile.reWrite('second test'.codeUnits), isNull);
-      expect(inFile.read(), equals('second test\n'.codeUnits));
+      final testMap = {'key': 'value'};
+      expect(inFile.write(json.encode(testMap).codeUnits), isNull);
+      expect(inFile.read(), equals(json.encode([testMap]).codeUnits));
+
+      final secondTestMap = {'second key': 'second value'};
+      expect(inFile.reWrite(json.encode(secondTestMap).codeUnits), isNull);
+      expect(inFile.read(), equals(json.encode([secondTestMap]).codeUnits));
     });
 
     test('reWrite with error', () {

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as path;
 
@@ -7,6 +8,8 @@ class InJSONFile extends InFile {
   @override
   File file;
 
+  List<Map> _memories;
+
   @override
   String memories;
 
@@ -15,13 +18,30 @@ class InJSONFile extends InFile {
     final extension = path.extension(file.path);
     if (extension != '.json') throw ArgumentError('Only json format support');
 
+    _memories = [];
     memories ??= file.readAsStringSync();
     memories.isEmpty ? memories = '[]' : null;
   }
 
   @override
   ReadWriterError write(List<int> bytes) {
-    // TODO: implement write
-    return super.write(bytes);
+    ReadWriterError status;
+
+    if (bytes.isEmpty) {
+      status = ReadWriterError.cannotBeWrite;
+    } else {
+      _memories.add(json.decode(String.fromCharCodes(bytes)));
+      memories = json.encode(_memories);
+    }
+
+    file.writeAsStringSync(memories);
+
+    return status;
+  }
+
+  @override
+  ReadWriterError reWrite(List<int> bytes) {
+    // TODO: implement reWrite
+    return super.reWrite(bytes);
   }
 }
