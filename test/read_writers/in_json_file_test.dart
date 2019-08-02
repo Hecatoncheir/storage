@@ -40,9 +40,12 @@ void main() {
       expect(inFile.write(json.encode(testMap).codeUnits), isNull);
       expect(inFile.read(), equals(json.encode([testMap]).codeUnits));
 
-      final secondTestMap = {'second key': 'second value'};
+      final List<Map> secondTestMap = [
+        {'second key': 'second value'}
+      ];
+
       expect(inFile.reWrite(json.encode(secondTestMap).codeUnits), isNull);
-      expect(inFile.read(), equals(json.encode([secondTestMap]).codeUnits));
+      expect(inFile.read(), equals(json.encode(secondTestMap).codeUnits));
     });
 
     test('reWrite with error', () {

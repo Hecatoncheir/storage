@@ -18,9 +18,14 @@ class InJSONFile extends InFile {
     final extension = path.extension(file.path);
     if (extension != '.json') throw ArgumentError('Only json format support');
 
-    _memories = [];
     memories ??= file.readAsStringSync();
-    memories.isEmpty ? memories = '[]' : null;
+
+    if (memories.isEmpty) {
+      _memories = [];
+      memories = '[]';
+    } else {
+      _memories = json.decode(memories);
+    }
   }
 
   @override
@@ -41,7 +46,25 @@ class InJSONFile extends InFile {
 
   @override
   ReadWriterError reWrite(List<int> bytes) {
-    // TODO: implement reWrite
-    return super.reWrite(bytes);
+    ReadWriterError status;
+
+    if (bytes.isEmpty) {
+      status = ReadWriterError.cannotBeWrite;
+    } else {
+      try {
+        _memories.clear();
+        for (Map map in json.decode(String.fromCharCodes(bytes))) {
+          _memories.add(map);
+        }
+
+        memories = json.encode(_memories);
+      } on Exception catch (err) {
+        return status = ReadWriterError.cannotBeWrite;
+      }
+    }
+
+    file.writeAsStringSync(memories, flush: true);
+
+    return status;
   }
 }
