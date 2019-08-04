@@ -39,6 +39,11 @@ class KVStore<K, V> implements Store {
     try {
       final content = readWriter.read();
       if (content.isNotEmpty) {
+        if (readWriter is InMemory) {
+          _cache = prepareCacheFromReadWriterInFileContent(
+              json.decode(String.fromCharCodes(content)));
+        }
+
         if (readWriter is InFile) {
           _cache = prepareCacheFromReadWriterInFileContent(
               json.decode(String.fromCharCodes(content)));
