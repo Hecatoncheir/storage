@@ -54,10 +54,22 @@ void main() {
     });
 
     test('write line', () {
-      expect(inFile.writeLine('first line'.codeUnits), isNull);
-      expect(inFile.writeLine('second line'.codeUnits), isNull);
-      expect(String.fromCharCodes(inFile.read()),
-          equals('''first line\nsecond line\n'''));
+      expect(
+          inFile.writeLine(
+              json.encode({'first line key': 'first line value'}).codeUnits),
+          isNull);
+
+      expect(
+          inFile.writeLine(
+              json.encode({'second line key': 'second line value'}).codeUnits),
+          isNull);
+
+      expect(
+          inFile.read(),
+          equals(json.encode([
+            {'first line key': 'first line value'},
+            {'second line key': 'second line value'}
+          ]).codeUnits));
     });
 
     test('write line with error', () {

@@ -4,7 +4,7 @@ import 'package:path/path.dart' as path;
 
 import 'package:storage/read_writers.dart';
 
-class InJSONFile extends InFile {
+class InJSONFile implements InFile {
   @override
   File file;
 
@@ -14,7 +14,7 @@ class InJSONFile extends InFile {
   String memories;
 
   /// Constructor.
-  InJSONFile(this.file, {this.memories}) : super(file, memories: memories) {
+  InJSONFile(this.file, {this.memories}) {
     final extension = path.extension(file.path);
     if (extension != '.json') throw ArgumentError('Only json format support');
 
@@ -67,4 +67,25 @@ class InJSONFile extends InFile {
 
     return status;
   }
+
+  @override
+  ReadWriterError writeLine(List<int> bytes) {
+    ReadWriterError status;
+
+    if (bytes.isEmpty) {
+      status = ReadWriterError.cannotBeWrite;
+    } else {
+      final map = json.decode(String.fromCharCodes(bytes));
+      _memories.add(map);
+
+      memories = json.encode(_memories);
+    }
+
+    file.writeAsStringSync(memories);
+
+    return status;
+  }
+
+  @override
+  List<int> read() => memories.codeUnits;
 }
