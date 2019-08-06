@@ -55,6 +55,7 @@ class KVStore<K, V> implements Store {
         }
       }
     } on Exception catch (exception) {
+      print(exception);
       log.warning(exception);
     }
   }
@@ -110,16 +111,21 @@ class KVStore<K, V> implements Store {
   }
 
   Map<String, Map<K, V>> prepareCacheFromReadWriterInJSONFileContent(
-      Map<String, dynamic> content) {
+      List content) {
     final cacheForWrite = Map<String, Map<K, V>>();
-    // TODO
-//
-//    for (String id in content.keys) {
-//      final entity = content[id];
-//      cacheForWrite[id] = {
-//        keyFromJson(entity.keys.first): valueFromJson(entity.values.first)
-//      };
-//    }
+
+    for (Map map in content) {
+      final decodedMap = {};
+
+      final Map inMap = map.values.first;
+      for (dynamic key in inMap.keys) {
+        print(key);
+        print(inMap[key]);
+        decodedMap[keyFromJson(key)] = valueFromJson(inMap[key]);
+      }
+
+      cacheForWrite[map.keys.first] = decodedMap;
+    }
 
     return cacheForWrite;
   }

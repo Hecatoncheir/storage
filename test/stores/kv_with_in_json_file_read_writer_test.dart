@@ -9,26 +9,26 @@ import 'package:test/test.dart';
 void main() {
   group('KVStorage', () {
     test('can prepare cache from readwriter content', () {
-      InFile readWriter;
-      KVStore<int, String> kvStore;
+      InJSONFile readWriter;
+      KVStore<String, Map<String, String>> kvStore;
 
       final file = File('test/stores/kv_with_in_file_read_writer.json')
         ..createSync();
 
       readWriter = InJSONFile(file)
         ..write(json.encode({
-          '0': {'0': 'value'}
+          'id': json.encode({'test key': 'test value'})
         }).codeUnits);
 
-      kvStore = KVStore<int, String>(readWriter,
+      kvStore = KVStore<String, Map<String, String>>(readWriter,
           keyToJson: (key) => key.toString(),
-          keyFromJson: int.parse,
-          valueToJson: (value) => value,
-          valueFromJson: (value) => value);
+          keyFromJson: (value) => value,
+          valueToJson: (value) => json.encode(value),
+          valueFromJson: (value) => json.decode(value));
 
-      final entity = kvStore.read('0');
-      expect(entity.data.keys.first, equals(0));
-      expect(entity.data.values.first, equals('value'));
+      final entity = kvStore.read('id');
+      expect(entity.data.keys.first, equals({'test key': 'test value'}));
+//      expect(entity.data.values.first, equals('test value'));
 
       file.deleteSync();
     });

@@ -4,13 +4,11 @@ import 'package:path/path.dart' as path;
 
 import 'package:storage/read_writers.dart';
 
-class InJSONFile implements InFile {
-  @override
+class InJSONFile implements ReadWriter {
   File file;
 
   List<Map> _memories;
 
-  @override
   String memories;
 
   /// Constructor.
@@ -24,11 +22,15 @@ class InJSONFile implements InFile {
       _memories = [];
       memories = '[]';
     } else {
-      _memories = json.decode(memories);
+      final listOfMaps = <Map>[];
+      for (Map map in json.decode(memories)) {
+        listOfMaps.add(map);
+      }
+
+      _memories = listOfMaps;
     }
   }
 
-  @override
   ReadWriterError write(List<int> bytes) {
     ReadWriterError status;
 
@@ -44,7 +46,6 @@ class InJSONFile implements InFile {
     return status;
   }
 
-  @override
   ReadWriterError reWrite(List<int> bytes) {
     ReadWriterError status;
 
@@ -68,7 +69,6 @@ class InJSONFile implements InFile {
     return status;
   }
 
-  @override
   ReadWriterError writeLine(List<int> bytes) {
     ReadWriterError status;
 
@@ -86,6 +86,5 @@ class InJSONFile implements InFile {
     return status;
   }
 
-  @override
   List<int> read() => memories.codeUnits;
 }
